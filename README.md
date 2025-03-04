@@ -34,3 +34,6 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 
 ## My computer crashed/The game crashed!
 - If this mod is crashing your game or computer, chances are you are running out of memory. Check your Task Manager to confirm as Ravenfield is loading. The only real solution is to unfortunately reduce the amount of flags you have being loaded. If you really need a lot of flags, you should consider making a flag pack instead which is MUCH more memory efficient.
+
+# Credits
+- [amir16yp](https://github.com/amir16yp) for the Unity request texture downloader used to load flag textures

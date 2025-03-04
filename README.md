@@ -14,7 +14,7 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 1. Install [BepInEx 5](https://github.com/BepInEx/BepInEx) into Ravenfield.
 2. Download the latest release for [Local Flags](https://github.com/MianReplicate/Local-Flags/releases).
 3. Extract zip into ```Ravenfield\BepInEx\plugins```
-4. Open the newly extracted folder, open "Packs", open "Local" and drag any flag textures (jpg or png only) you want into the "CustomFlags" folder.
+4. Open the newly extracted folder, open "Packs", open "Local" and drag any flag textures (jpg and png only) you want into the "CustomFlags" folder.
 5. Launch Ravenfield and enjoy your new flags!
 
 **(Optional Steps)**

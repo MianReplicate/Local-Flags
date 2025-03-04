@@ -1,5 +1,5 @@
 # Introduction
-Local Flags is a BepInEx mod for Ravenfield that interacts with the Custom Flags Framework to allow users to add flags locally without needing to make or install their own flag packs. As such this removes the need for downloading or learning external tools like the Ravenfield modding tools or the Unity Editor.
+Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flags Framework](https://steamcommunity.com/sharedfiles/filedetails/?id=3385310995) to allow users to add flags locally without needing to make or install their own flag packs. As such this removes the need for downloading or learning external tools like the Ravenfield modding tools or the Unity Editor.
 
 ## Why should I use this over creating my own flag packs?
 - Removes the need for learning the Unity Editor or Ravenfield modding tools.

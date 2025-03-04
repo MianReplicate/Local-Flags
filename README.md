@@ -9,7 +9,6 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 - Much less memory efficient compared to installing a flag pack mutator from the workshop. This drastically reduces the amount of flags you can have. Make sure to optimize your flag images before hand to make them as ram efficient. (May improve in the future)
 - Longer game startup times. (May improve in the future)
 - This does not add a mutator and instead directly hooks into the Custom Flags Framework when the game starts up to add the flags. As such, you cannot disable/enable packs you want created by this mod using game configurations (May change in the future)
-- No way to add custom team colors for each flag texture (May change in the future)
 
 # Installation
 
@@ -21,8 +20,9 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 
 **(Optional Steps)**
 
-6. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover. Make sure your file is named "cover" and is a jpg or png file.
-7. If you want to, you can create multiple local packs. In "Packs", duplicate the "Local" folder and rename it. This name will be the name of the pack ingame. You now have another pack that you can separate flags into and a different cover for!
+6. You can assign colors to flags (this affects the team color) by creating an image with a color at pixel 0, 0 with the name of its assigned flag. For example, if you wanted to assign the color blue to the United States flag, you would create an image named the exact same as the United States flag texture image, and then make the solid color of the image blue, and then save this image and drag it into "CustomFlagToTeamColors."
+7. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover. Make sure your file is named "cover" and is a jpg or png file.
+8. If you want to, you can create multiple local packs. In "Packs", duplicate the "Local" folder and rename it. This name will be the name of the pack ingame. You now have another pack that you can separate flags into and a different cover for!
 
 # FAQ
 

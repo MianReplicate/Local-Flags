@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>LocalFlags</AssemblyName>
     <Product>My first plugin</Product>
     <Version>1.0.0</Version>
@@ -13,12 +12,14 @@
       https://nuget.samboy.dev/v3/index.json
     </RestoreAdditionalProjectSources>
     <RootNamespace>LocalFlags</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.9" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.48" IncludeAssets="compile" />
   </ItemGroup>
   
@@ -30,5 +31,10 @@
   <Reference Include="Assembly-CSharp">
     <HintPath>lib\Assembly-CSharp.dll</HintPath>
   </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ReferencePathWithRefAssemblies Update="C:\Users\Administrator\.nuget\packages\netstandard.library\2.0.3\build\netstandard2.0\ref\System.Drawing.dll" />
+    <ReferencePathWithRefAssemblies Update="C:\Users\Administrator\.nuget\packages\system.drawing.common\9.0.2\lib\netstandard2.0\System.Drawing.Common.dll" />
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LocalFlags")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8be84be621906932d5d033f7204af6988c13a8ac")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+935616c483088529f75d81cd76cf4fe6a6f4f1f6")]
 [assembly: System.Reflection.AssemblyProductAttribute("My first plugin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LocalFlags")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

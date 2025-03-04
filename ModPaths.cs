@@ -7,7 +7,6 @@ public class ModPaths
 {
     public static string DefaultCoverPath;
     public static string PacksPath;
-    public static string CustomFlagToTeamColorsPath;
     public static void CreateModDirectoryIfNotExist()
     {
         if (!Directory.Exists(Path.Combine(Paths.PluginPath, "LocalFlags")))
@@ -26,16 +25,10 @@ public class ModPaths
         CreateModDirectoryIfNotExist();
         DefaultCoverPath = GetPathForModDirectory("cover.png");
         PacksPath = GetPathForModDirectory("Packs");
-        CustomFlagToTeamColorsPath = GetPathForModDirectory("CustomFlagToTeamColors");
         
         if (!Directory.Exists(PacksPath))
         {
             Directory.CreateDirectory(PacksPath);
-        }
-
-        if (!Directory.Exists(CustomFlagToTeamColorsPath))
-        {
-            // Directory.CreateDirectory(CustomFlagToTeamColorsPath);
         }
 
     }

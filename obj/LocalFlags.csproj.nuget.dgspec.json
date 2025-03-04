@@ -66,6 +66,10 @@
               "version": "[2.0.3, )",
               "autoReferenced": true
             },
+            "SixLabors.ImageSharp": {
+              "target": "Package",
+              "version": "[2.1.9, )"
+            },
             "UnityEngine.Modules": {
               "include": "Compile",
               "target": "Package",

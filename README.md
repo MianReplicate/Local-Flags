@@ -1,12 +1,12 @@
 # Introduction
-Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flags Framework](https://steamcommunity.com/sharedfiles/filedetails/?id=3385310995) to allow users to add flags locally without needing to make or install their own flag packs. As such this removes the need for downloading or learning external tools like the Ravenfield modding tools or the Unity Editor.
+Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flags Framework](https://steamcommunity.com/sharedfiles/filedetails/?id=3385310995) to allow users to add flags locally without needing to make or install their own flag pack mutators. As such this removes the need for downloading or learning external tools like the Ravenfield modding tools or the Unity Editor.
 
-## Why should I use this over creating my own flag packs?
+## Why should I use this over creating my own flag pack mutators?
 - Removes the need for learning the Unity Editor or Ravenfield modding tools.
 - A much simpler process than creating your own flag packs. Adding custom flags is much faster with this.
 
-## Why should I NOT use this over flag packs?
-- Much less memory efficient compared to installing a flag pack from the workshop. This drastically reduces the amount of flags you can have. Make sure to optimize your flag images before hand to make them as ram efficient. (May improve in the future)
+## Why should I NOT use this over flag pack mutators?
+- Much less memory efficient compared to installing a flag pack mutator from the workshop. This drastically reduces the amount of flags you can have. Make sure to optimize your flag images before hand to make them as ram efficient. (May improve in the future)
 - Longer game startup times. (May improve in the future)
 - This does not add a mutator and instead directly hooks into the Custom Flags Framework when the game starts up to add the flags. As such, you cannot disable/enable packs you want created by this mod using game configurations (May change in the future)
 - No way to add custom team colors for each flag texture (May change in the future)

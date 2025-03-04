@@ -21,7 +21,7 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 
 **(Optional Steps)**
 
-6. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover.
+6. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover. Make sure your file is named "cover" and is a jpg or png file.
 7. If you want to, you can create multiple local packs. In "Packs", duplicate the "Local" folder and rename it. This name will be the name of the pack ingame. You now have another pack that you can separate flags into and a different cover for!
 
 # FAQ

@@ -9,6 +9,7 @@ Local Flags is a BepInEx mod for Ravenfield that interacts with the [Custom Flag
 - Much less memory efficient compared to installing a flag pack from the workshop. This drastically reduces the amount of flags you can have. Make sure to optimize your flag images before hand to make them as ram efficient. (May improve in the future)
 - Longer game startup times. (May improve in the future)
 - This does not add a mutator and instead directly hooks into the Custom Flags Framework when the game starts up to add the flags. As such, you cannot disable/enable packs you want created by this mod using game configurations (May change in the future)
+- No way to add custom team colors for each flag texture (May change in the future)
 
 # Installation
 

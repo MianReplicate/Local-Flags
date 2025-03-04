@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Threading;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -19,99 +19,196 @@ public class LocalFlags : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
     internal const string Framework = "Custom Flag Framework";
-    internal string CoverPath;
-    internal string FlagsPath;
-    internal string CustomFlagToTeamColorsPath;
-    internal static Texture2D Cover;
-    internal static List<Texture2D> Flags = new List<Texture2D>();
+    internal static List<Pack> packs = new List<Pack>();
+    internal static int CurrentlyDownloading;
+    internal static int QueuedLoads;
+    internal static float PrevTimeScale;
+    public static LocalFlags Instance;
     
     private void Awake()
     {
+        Instance = this;
         // Plugin startup logic
         Logger = base.Logger;
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
         
         var harmony = new Harmony("netdot.mian.patch");
         harmony.PatchAll();
-
-        createModDirectoryIfNotExist();
-        CoverPath = getPathForModDirectory("cover.png");
-        FlagsPath = getPathForModDirectory("CustomFlags");
-        CustomFlagToTeamColorsPath = getPathForModDirectory("CustomFlagToTeamColors");
         
-        if (!Directory.Exists(FlagsPath))
+        ModPaths.Init();
+        
+        var packPaths = Directory.GetDirectories(ModPaths.PacksPath);
+        foreach (var packPath in packPaths)
         {
-            Directory.CreateDirectory(FlagsPath);
-        }
-
-        if (!Directory.Exists(CustomFlagToTeamColorsPath))
-        {
-            // Directory.CreateDirectory(CustomFlagToTeamColorsPath);
-        }
-
-        StartCoroutine(LoadTextureAsync(CoverPath, texture => Cover = texture));
-
-        var flags = Directory.GetFiles(FlagsPath);
-        foreach(string flagPath in flags)
-        {
-            StartCoroutine(LoadTextureAsync(flagPath, texture => Flags.Add(texture)));
+            string[] arr = packPath.Split('\\');
+            string packName = arr[arr.Length - 1];
+            
+            packs.Add(new Pack(packPath, packName));
         }
         
         // Texture2Ds aren't normally exposed to RS so we have to expose it ourselves using the already provided TextureProxy class
-        Script.GlobalOptions.CustomConverters.SetClrToScriptCustomConversion<Texture2D>((Func<Script, Texture2D, DynValue>) ((s, v) => DynValue.FromObject(s, (object) TextureProxy.New(v))));
+        Script.GlobalOptions.CustomConverters.SetClrToScriptCustomConversion<Texture2D>((s, v) => DynValue.FromObject(s, TextureProxy.New(v)));
     }
 
-    private static void createModDirectoryIfNotExist()
+    private void Update()
     {
-        if (!Directory.Exists(Path.Combine(Paths.PluginPath, "LocalFlags")))
+        if (QueuedLoads > 0)
         {
-            Directory.CreateDirectory(Path.Combine(Paths.PluginPath, "LocalFlags"));
+            PrevTimeScale = PrevTimeScale == 0 ? Time.timeScale : PrevTimeScale;
+            Time.timeScale = 0;
+        } else
+        {
+            Time.timeScale = PrevTimeScale;
         }
     }
 
-    private static string getPathForModDirectory(string path)
+    public void QueueTextureAsync(string filePath, Action<Texture2D> onComplete)
     {
-        return Path.Combine(Paths.PluginPath, "LocalFlags", path);
+        StartCoroutine(LoadTextureAsync(filePath, onComplete));
     }
-    private static IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete, Action<float> onProgress = null)
+
+    public Texture2D LoadTexture(string filePath)
     {
-        // Convert file path to URI format
-        string uri = "file:///" + filePath.Replace('\\', '/');
- 
-        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(uri))
+        QueuedLoads++;
+        Texture2D texture = null;
+        try
         {
-            var asyncOp = www.SendWebRequest();
- 
-            // Report progress while loading
-            while (!asyncOp.isDone)
-            {
-                onProgress?.Invoke(www.downloadProgress);
-                yield return null;
-            }
- 
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Logger.LogError($"Error loading texture: {www.error} from {filePath}");
-                onComplete?.Invoke(null);
-                yield break;
-            }
- 
-            // Get the downloaded texture
-            Texture2D texture = DownloadHandlerTexture.GetContent(www);
+            texture = new Texture2D(2, 2);
+            texture.LoadImage(File.ReadAllBytes(filePath));
             var array = filePath.Split('.');
             var fullName = "";
             for (var i = 0; i < array.Length - 1; i++)
             {
                 fullName += array[i];
             }
-
+        
             array = fullName.Split('\\');
             fullName = array[array.Length-1];
             texture.name = fullName;
+            texture.Compress(false);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Failed to load texture ({filePath}): "+e);
+        }
+        QueuedLoads--;
+        return texture;
+    }
+    
+    public IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete)
+    {
+        QueuedLoads++;
+        while (CurrentlyDownloading >= 10)
+        {
+            yield return null;
+        }
+        CurrentlyDownloading++;
+        Logger.LogInfo($"Currently loading {CurrentlyDownloading} textures..");
+        
+        // convert filePath
+        var convertedFilePath = "file:///" + filePath.Replace("\\", "/");
+
+        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(convertedFilePath))
+        {
+            var async = www.SendWebRequest();
+            while (!async.isDone)
+            {
+                yield return null;
+            }
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Logger.LogError($"Failed to load {filePath}: {www.error}");
+                yield break;
+            }
             
+            Texture2D texture = DownloadHandlerTexture.GetContent(www); 
+            var array = filePath.Split('.');
+            var fullName = "";
+            for (var i = 0; i < array.Length - 1; i++)
+            {
+                fullName += array[i];
+            }
+        
+            array = fullName.Split('\\');
+            fullName = array[array.Length-1];
+            texture.name = fullName;
+            texture.Compress(false);
+        
             Logger.LogInfo($"Texture ({texture.name}) loaded successfully: {texture.width}x{texture.height} from {filePath}");
             onComplete?.Invoke(texture);
         }
+        CurrentlyDownloading--;
+        QueuedLoads--;
+    }
+}
+
+public class Pack
+{
+    public static readonly Texture2D DefaultCover = LocalFlags.Instance.LoadTexture(ModPaths.DefaultCoverPath);
+
+    private readonly String _name;
+    private readonly Texture2D _cover;
+    private List<Texture2D> _flags = new List<Texture2D>();
+    private readonly String _directory;
+
+    public Pack(String directory, String name)
+    {
+        _name = name;
+        _directory = directory;
+        if (File.Exists(_directory + "\\cover.png"))
+        {
+            _cover = LocalFlags.Instance.LoadTexture(_directory + "\\cover.png");
+        }
+        else if(File.Exists(_directory + "\\cover.jpg"))
+        {
+            _cover = LocalFlags.Instance.LoadTexture(_directory + "\\cover.jpg");
+        }
+
+        if (_cover == null)
+        {
+            _cover = DefaultCover;
+        }
+        
+        var flags = GetFlagFiles();
+
+        if (flags != null)
+        {
+            foreach(string flagPath in flags)
+            {
+                LocalFlags.Instance.QueueTextureAsync(flagPath, AddFlag);
+            }
+        }
+    }
+
+    public String GetName()
+    {
+        return _name;
+    }
+
+    public Texture2D GetCover()
+    {
+        return _cover;
+    }
+
+    public List<Texture2D> GetFlags()
+    {
+        return _flags;
+    }
+
+    public void AddFlag(Texture2D flag)
+    {
+        _flags.Add(flag);
+    }
+
+    public String[] GetFlagFiles()
+    {
+        if (Directory.Exists(_directory + "\\CustomFlags"))
+        {
+            return Directory.GetFiles(_directory + "\\CustomFlags");
+        }
+
+        return null;
     }
 }
 
@@ -129,15 +226,23 @@ class ModManagerPatch
             var framework = ScriptedBehaviour.GetScript(prefab);
             if (framework)
             {
-                LocalFlags.Logger.LogInfo("Found framework! Adding local pack");
-            
-                var mutatorData = new Dictionary<string, object>();
-                mutatorData.Add("name", "local");
-                mutatorData.Add("cover", LocalFlags.Cover);
-                mutatorData.Add("CustomFlags", LocalFlags.Flags);
-                mutatorData.Add("CustomFlagToTeamColors", new ArrayList());
+                LocalFlags.Logger.LogInfo("Found framework! Adding local packs.");
+
+                foreach (var pack in LocalFlags.packs)
+                {
+                    LocalFlags.Logger.LogInfo($"Adding local pack: {pack.GetName().ToUpper()}");
+                    var mutatorData = new Dictionary<string, object>();
+                    mutatorData.Add("name", pack.GetName());
+                    mutatorData.Add("cover", pack.GetCover());
+                    mutatorData.Add("CustomFlags", pack.GetFlags());
+                    mutatorData.Add("CustomFlagToTeamColors", new ArrayList());
                 
-                framework.Call("addFlagPack", mutatorData);
+                    framework.Call("addFlagPack", mutatorData);   
+                }
+            }
+            else
+            {
+                LocalFlags.Logger.LogInfo("No framework found :<");
             }
         }
     }

@@ -11,3 +11,4 @@ C:\Users\Administrator\RiderProjects\LocalFlags\obj\Debug\netstandard2.0\LocalFl
 C:\Users\Administrator\RiderProjects\LocalFlags\obj\Debug\netstandard2.0\LocalFlags.csproj.Up2Date
 C:\Users\Administrator\RiderProjects\LocalFlags\obj\Debug\netstandard2.0\LocalFlags.dll
 C:\Users\Administrator\RiderProjects\LocalFlags\obj\Debug\netstandard2.0\LocalFlags.pdb
+C:\Users\Administrator\RiderProjects\LocalFlags\obj\Debug\netstandard2.0\LocalFlags.sourcelink.json

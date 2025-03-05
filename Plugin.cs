@@ -24,13 +24,13 @@ Ravenfield wont start up after long optimization? Maybe queuing is out of sync..
 [BepInPlugin("netdot.mian.localflags", "Local Flags", "1.2.0")]
 public class LocalFlags : BaseUnityPlugin
 {
-    internal static new ManualLogSource Logger;
+    public new static ManualLogSource Logger;
     internal const string Framework = "Custom Flag Framework";
-    internal static List<Pack> packs = new List<Pack>();
-    internal static int CurrentlyDownloading;
-    internal static int CurrentlyOptimizing;
-    internal static int QueuedLoads;
-    internal static float PrevTimeScale;
+    internal static readonly List<Pack> Packs = [];
+    private static int _currentlyDownloading;
+    private static int _currentlyOptimizing;
+    private static int _queuedLoads;
+    private static float _prevTimeScale;
     public static LocalFlags Instance;
     
     private void Awake()
@@ -49,10 +49,10 @@ public class LocalFlags : BaseUnityPlugin
         var packPaths = Directory.GetDirectories(ModPaths.PacksPath);
         foreach (var packPath in packPaths)
         {
-            string[] arr = packPath.Split('\\');
-            string packName = arr[arr.Length - 1];
+            var arr = packPath.Split('\\');
+            var packName = arr[arr.Length - 1];
             
-            packs.Add(new Pack(packPath, packName));
+            Packs.Add(new Pack(packPath, packName));
         }
         
         // Texture2Ds aren't normally exposed to RS so we have to expose it ourselves using the already provided TextureProxy class
@@ -61,14 +61,16 @@ public class LocalFlags : BaseUnityPlugin
 
     private void Update()
     {
-        if (QueuedLoads > 0)
+        if (_queuedLoads > 0)
         {
             if(Time.timeScale != 0)
-                PrevTimeScale = PrevTimeScale == 0 ? Time.timeScale : PrevTimeScale;
+                _prevTimeScale = _prevTimeScale == 0 ? Time.timeScale : _prevTimeScale;
             Time.timeScale = 0;
+            Logger.LogInfo($"Timescale is paused");
         } else
         {
-            Time.timeScale = PrevTimeScale;
+            Time.timeScale = _prevTimeScale;
+            Logger.LogInfo($"Timescale is now back to {Time.timeScale}");
         }
     }
 
@@ -87,9 +89,9 @@ public class LocalFlags : BaseUnityPlugin
         }, false, true));
     }
     
-    public Texture2D LoadTexture(string filePath)
+    public static Texture2D LoadTexture(string filePath)
     {
-        QueuedLoads++;
+        _queuedLoads++;
         Texture2D texture = null;
         try
         {
@@ -103,29 +105,29 @@ public class LocalFlags : BaseUnityPlugin
         {
             Logger.LogError($"Failed to load texture ({filePath}): "+e);
         }
-        QueuedLoads--;
+        _queuedLoads--;
         return texture;
     }
     
-    public IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete, bool nonReadable = false, bool optimizing = false)
+    private static IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete, bool nonReadable = false, bool optimizing = false)
     {
-        QueuedLoads++;
-        while (CurrentlyDownloading >= 10 || (CurrentlyOptimizing > 0 && !optimizing))
+        _queuedLoads++;
+        while (_currentlyDownloading >= 10 || (_currentlyOptimizing > 0 && !optimizing))
         {
             yield return null;
         }
 
         if (optimizing)
         {
-            CurrentlyOptimizing++;
+            _currentlyOptimizing++;
         }
-        CurrentlyDownloading++;
-        Logger.LogInfo($"Currently loading {CurrentlyDownloading} textures..");
+        _currentlyDownloading++;
+        Logger.LogInfo($"Currently loading {_currentlyDownloading} textures..");
         
         // convert filePath
         var convertedFilePath = "file:///" + filePath.Replace("\\", "/");
 
-        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(convertedFilePath, nonReadable))
+        using (var www = UnityWebRequestTexture.GetTexture(convertedFilePath, nonReadable))
         {
             var async = www.SendWebRequest();
             while (!async.isDone)
@@ -135,52 +137,47 @@ public class LocalFlags : BaseUnityPlugin
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                if (optimizing)
-                {
-                    CurrentlyOptimizing--;
-                }
-                CurrentlyDownloading--;
                 Logger.LogError($"Failed to load {filePath}: {www.error}");
                 yield break;
             }
-            Texture2D texture = DownloadHandlerTexture.GetContent(www); 
+            var texture = DownloadHandlerTexture.GetContent(www); 
             texture.name = Path.GetFileNameWithoutExtension(filePath);
-
-            if (optimizing)
-            {
-                CurrentlyOptimizing--;
-            }
-            CurrentlyDownloading--;
+            
             Logger.LogInfo($"Texture ({texture.name}) loaded successfully: {texture.width}x{texture.height} from {filePath}");
             onComplete?.Invoke(texture);
             www.DisposeHandlers();
         }
-        QueuedLoads--;
+        if (optimizing)
+        {
+            _currentlyOptimizing--;
+        }
+        _currentlyDownloading--;
+        _queuedLoads--;
         Resources.UnloadUnusedAssets();
     }
 }
 
 public class Pack
 {
-    public static readonly Texture2D DefaultCover = LocalFlags.Instance.LoadTexture(ModPaths.DefaultCoverPath);
+    private static readonly Texture2D DefaultCover = LocalFlags.LoadTexture(ModPaths.DefaultCoverPath);
 
-    private readonly String _name;
+    private readonly string _name;
     private readonly Texture2D _cover;
-    private List<Texture2D> _flags = new List<Texture2D>();
-    private Color[] _flagsToTeamColors;
-    private readonly String _directory;
+    private readonly List<Texture2D> _flags = [];
+    private readonly Color[] _flagsToTeamColors;
+    private readonly string _directory;
 
-    public Pack(String directory, String name)
+    public Pack(string directory, string name)
     {
         _name = name;
         _directory = directory;
         if (File.Exists(_directory + "\\cover.png"))
         {
-            _cover = LocalFlags.Instance.LoadTexture(_directory + "\\cover.png");
+            _cover = LocalFlags.LoadTexture(_directory + "\\cover.png");
         }
         else if(File.Exists(_directory + "\\cover.jpg"))
         {
-            _cover = LocalFlags.Instance.LoadTexture(_directory + "\\cover.jpg");
+            _cover = LocalFlags.LoadTexture(_directory + "\\cover.jpg");
         }
 
         if (_cover == null)
@@ -191,11 +188,7 @@ public class Pack
         var flags = GetFlagFiles();
         var toOptimize = GetOptimizeFlagFiles();
         var colorPaths = GetColorFiles();
-        var colors = new List<String>();
-        foreach(var colorPath in colorPaths)
-        {
-            colors.Add(Path.GetFileNameWithoutExtension(colorPath));
-        }
+        var colors = colorPaths.Select(colorPath => Path.GetFileNameWithoutExtension(colorPath)).ToList();
 
         if (toOptimize != null)
         {
@@ -204,7 +197,7 @@ public class Pack
                 LocalFlags.Logger.LogInfo($"Optimizing texture: {Path.GetFileNameWithoutExtension(flagPath)}");
                 LocalFlags.Instance.QueueOptimizeTextureAsync(flagPath, texture =>
                 {
-                    byte[] bytes = texture.EncodeToJPG(100); // make quality a user value
+                    var bytes = texture.EncodeToJPG(100); // make quality a user value
                     IMagickImage<byte> image = new MagickImage(bytes);
                     image.SetCompression(CompressionMethod.DXT5);
                     if (image.Width > 2000 && image.Height > 2000)
@@ -230,29 +223,26 @@ public class Pack
                     texture.Compress(false);
                     texture.Apply(false, true);
                     AddFlag(texture);
-                    int flagLocation = _flags.IndexOf(texture);
-
+                    
+                    var flagLocation = _flags.IndexOf(texture);
                     var colorIndex = colors.FindIndex(color => color.ToUpper() == texture.name);
-                    Color unityColor;
-                    string pathToUse;
-                    if (colorIndex != -1)
-                    {
-                        pathToUse = colorPaths[colorIndex];
-                    }
-                    else
-                    {
-                        pathToUse = flagPath;
-                    }
+                    var pathToUse = colorIndex != -1 ? colors[colorIndex] : flagPath;
                     
                     IMagickImage<byte> image = new MagickImage(File.ReadAllBytes(pathToUse));
+                    IMagickColor<byte> pixel;
                     if (colorIndex == -1)
                     {
+                        image.Resize(1, 1);
+                        pixel = image.GetPixels()[0, 0].ToColor();
                         image.Resize(15, 15);
                         image.Write(_directory + @"\CustomFlagToTeamColors\" + texture.name + ".jpeg", MagickFormat.Jpeg);
                     }
-                    IMagickColor<byte> pixel = image.GetPixels()[0, 0].ToColor();
+                    else
+                    {
+                        pixel = image.GetPixels()[0, 0].ToColor();
+                    }
                     
-                    unityColor = new Color((float) pixel.R / 255, (float) pixel.G / 255, (float) pixel.B / 255);
+                    var unityColor = new Color((float) pixel.R / 255, (float) pixel.G / 255, (float) pixel.B / 255);
                     image.Dispose();
                     
                     _flagsToTeamColors[flagLocation] = unityColor;
@@ -262,7 +252,7 @@ public class Pack
         }
     }
 
-    public String GetName()
+    public string GetName()
     {
         return _name;
     }
@@ -282,12 +272,12 @@ public class Pack
         return _flagsToTeamColors.ToList();
     }
 
-    public void AddFlag(Texture2D flag)
+    private void AddFlag(Texture2D flag)
     {
         _flags.Add(flag);
     }
 
-    public String[] GetOptimizeFlagFiles()
+    private string[] GetOptimizeFlagFiles()
     {
         if (!Directory.Exists(_directory + "\\OptimizeFlags"))
         {
@@ -296,7 +286,7 @@ public class Pack
         return Directory.GetFiles(_directory + "\\OptimizeFlags");
     }
 
-    public String[] GetFlagFiles()
+    private string[] GetFlagFiles()
     {
         if (!Directory.Exists(_directory + "\\CustomFlags"))
         {
@@ -324,7 +314,7 @@ public class Pack
         return array.ToArray();
     }
 
-    public String[] GetColorFiles()
+    private string[] GetColorFiles()
     {
         if (Directory.Exists(_directory + "\\CustomFlagToTeamColors"))
         {
@@ -344,29 +334,28 @@ class ModManagerPatch
     {
         LocalFlags.Logger.LogInfo("MODMANAGER JUST CREATED DA PREFABS!");
         var prefab = GameObject.Find(LocalFlags.Framework);
-        if (prefab)
+        if (prefab && ScriptedBehaviour.GetScript(prefab) != null)
         {
             var framework = ScriptedBehaviour.GetScript(prefab);
-            if (framework)
-            {
-                LocalFlags.Logger.LogInfo("Found framework! Adding local packs.");
 
-                foreach (var pack in LocalFlags.packs)
-                {
-                    LocalFlags.Logger.LogInfo($"Adding local pack: {pack.GetName().ToUpper()}");
-                    var mutatorData = new Dictionary<string, object>();
-                    mutatorData.Add("name", pack.GetName());
-                    mutatorData.Add("cover", pack.GetCover());
-                    mutatorData.Add("CustomFlags", pack.GetFlags());
-                    mutatorData.Add("CustomFlagToTeamColors", pack.GetFlagsToTeamColors());
-                
-                    framework.Call("addFlagPack", mutatorData);   
-                }
-            }
-            else
+            LocalFlags.Logger.LogInfo("Found framework! Adding local packs.");
+
+            foreach (var pack in LocalFlags.Packs)
             {
-                LocalFlags.Logger.LogInfo("No framework found :<");
+                LocalFlags.Logger.LogInfo($"Adding local pack: {pack.GetName().ToUpper()}");
+                Dictionary<string, object> mutatorData = [];
+                mutatorData.Add("name", pack.GetName());
+                mutatorData.Add("cover", pack.GetCover());
+                mutatorData.Add("CustomFlags", pack.GetFlags());
+                mutatorData.Add("CustomFlagToTeamColors", pack.GetFlagsToTeamColors());
+
+                framework.Call("addFlagPack", mutatorData);
             }
+
+        }
+        else
+        { 
+            LocalFlags.Logger.LogInfo("No framework found :<");
         }
     }
 }

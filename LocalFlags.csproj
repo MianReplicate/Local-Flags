@@ -19,13 +19,14 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-    <PackageReference Include="Magick.NET-Q8-x64" Version="14.5.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.5.0" />
     <PackageReference Include="Magick.NET.Core" Version="14.5.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.48" IncludeAssets="compile" />
   </ItemGroup>
 
   <PropertyGroup>
   <MagickCopyNativeWindows>true</MagickCopyNativeWindows>
+  <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup> 
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

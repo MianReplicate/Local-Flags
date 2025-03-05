@@ -16,11 +16,6 @@ using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-/**
- TODO: 
-Ravenfield wont start up after long optimization? Maybe queuing is out of sync..?
-**/
-
 [BepInPlugin("netdot.mian.localflags", "Local Flags", "1.2.0")]
 public class LocalFlags : BaseUnityPlugin
 {
@@ -66,11 +61,9 @@ public class LocalFlags : BaseUnityPlugin
             if(Time.timeScale != 0)
                 _prevTimeScale = _prevTimeScale == 0 ? Time.timeScale : _prevTimeScale;
             Time.timeScale = 0;
-            Logger.LogInfo($"Timescale is paused");
         } else
         {
             Time.timeScale = _prevTimeScale;
-            Logger.LogInfo($"Timescale is now back to {Time.timeScale}");
         }
     }
 

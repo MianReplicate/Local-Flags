@@ -39,7 +39,7 @@ public class LocalFlags : BaseUnityPlugin
         Instance = this;
         // Plugin startup logic
         Logger = base.Logger;
-        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+        Logger.LogInfo($"Local Flags is gonna local all over you!");
         
         var harmony = new Harmony("netdot.mian.patch");
         harmony.PatchAll();

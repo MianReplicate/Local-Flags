@@ -60,15 +60,19 @@
               "target": "Package",
               "version": "[2.*, )"
             },
+            "Magick.NET-Q8-x64": {
+              "target": "Package",
+              "version": "[14.5.0, )"
+            },
+            "Magick.NET.Core": {
+              "target": "Package",
+              "version": "[14.5.0, )"
+            },
             "NETStandard.Library": {
               "suppressParent": "All",
               "target": "Package",
               "version": "[2.0.3, )",
               "autoReferenced": true
-            },
-            "SixLabors.ImageSharp": {
-              "target": "Package",
-              "version": "[2.1.9, )"
             },
             "UnityEngine.Modules": {
               "include": "Compile",

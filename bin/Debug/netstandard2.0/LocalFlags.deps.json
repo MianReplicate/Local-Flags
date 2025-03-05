@@ -12,8 +12,9 @@
           "BepInEx.Analyzers": "1.0.8",
           "BepInEx.Core": "5.4.21",
           "BepInEx.PluginInfoProps": "2.1.0",
+          "Magick.NET-Q8-x64": "14.5.0",
+          "Magick.NET.Core": "14.5.0",
           "NETStandard.Library": "2.0.3",
-          "SixLabors.ImageSharp": "2.1.9",
           "UnityEngine.Modules": "2020.3.48",
           "Assembly-CSharp": "0.0.0.0"
         },
@@ -46,6 +47,25 @@
           "lib/netstandard2.0/0Harmony.dll": {
             "assemblyVersion": "2.7.0.0",
             "fileVersion": "2.7.0.0"
+          }
+        }
+      },
+      "Magick.NET-Q8-x64/14.5.0": {
+        "dependencies": {
+          "Magick.NET.Core": "14.5.0"
+        },
+        "runtime": {
+          "lib/netstandard20/Magick.NET-Q8-x64.dll": {
+            "assemblyVersion": "14.5.0.0",
+            "fileVersion": "14.5.0.0"
+          }
+        }
+      },
+      "Magick.NET.Core/14.5.0": {
+        "runtime": {
+          "lib/netstandard20/Magick.NET.Core.dll": {
+            "assemblyVersion": "14.5.0.0",
+            "fileVersion": "14.5.0.0"
           }
         }
       },
@@ -109,29 +129,6 @@
       "NETStandard.Library/2.0.3": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0"
-        }
-      },
-      "SixLabors.ImageSharp/2.1.9": {
-        "dependencies": {
-          "System.Buffers": "4.5.1",
-          "System.Memory": "4.5.4",
-          "System.Numerics.Vectors": "4.5.0",
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0",
-          "System.Text.Encoding.CodePages": "5.0.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/SixLabors.ImageSharp.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.1.9.0"
-          }
-        }
-      },
-      "System.Buffers/4.5.1": {
-        "runtime": {
-          "lib/netstandard2.0/System.Buffers.dll": {
-            "assemblyVersion": "4.0.3.0",
-            "fileVersion": "4.6.28619.1"
-          }
         }
       },
       "System.Collections/4.3.0": {
@@ -282,27 +279,6 @@
           }
         }
       },
-      "System.Memory/4.5.4": {
-        "dependencies": {
-          "System.Buffers": "4.5.1",
-          "System.Numerics.Vectors": "4.5.0",
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Memory.dll": {
-            "assemblyVersion": "4.0.1.1",
-            "fileVersion": "4.6.28619.1"
-          }
-        }
-      },
-      "System.Numerics.Vectors/4.5.0": {
-        "runtime": {
-          "lib/netstandard2.0/System.Numerics.Vectors.dll": {
-            "assemblyVersion": "4.1.4.0",
-            "fileVersion": "4.6.26515.6"
-          }
-        }
-      },
       "System.Reflection/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -380,14 +356,6 @@
           "Microsoft.NETCore.Targets": "1.1.0"
         }
       },
-      "System.Runtime.CompilerServices.Unsafe/5.0.0": {
-        "runtime": {
-          "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {
-            "assemblyVersion": "5.0.0.0",
-            "fileVersion": "5.0.20.51904"
-          }
-        }
-      },
       "System.Runtime.Extensions/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -417,17 +385,6 @@
           "Microsoft.NETCore.Platforms": "1.1.0",
           "Microsoft.NETCore.Targets": "1.1.0",
           "System.Runtime": "4.3.0"
-        }
-      },
-      "System.Text.Encoding.CodePages/5.0.0": {
-        "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Text.Encoding.CodePages.dll": {
-            "assemblyVersion": "5.0.0.0",
-            "fileVersion": "5.0.20.51904"
-          }
         }
       },
       "System.Threading/4.3.0": {
@@ -501,6 +458,20 @@
       "path": "harmonyx/2.7.0",
       "hashPath": "harmonyx.2.7.0.nupkg.sha512"
     },
+    "Magick.NET-Q8-x64/14.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GD3RrzaLTHCi7XTbU8FDChcucRpDoNjeBRNfUAEgJckpQbFrej776//w8hhihe3lD82y6EweqBUJKz9Bn/LtrQ==",
+      "path": "magick.net-q8-x64/14.5.0",
+      "hashPath": "magick.net-q8-x64.14.5.0.nupkg.sha512"
+    },
+    "Magick.NET.Core/14.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-X2BeWMkSTQeqIR+dSPhr3Wh0CWvhqpL8vRa7hK8YQRQo+qG97/P+pldmEMStemccSWUe3Y88VhxfjQ5CCp2YtQ==",
+      "path": "magick.net.core/14.5.0",
+      "hashPath": "magick.net.core.14.5.0.nupkg.sha512"
+    },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
       "serviceable": true,
@@ -542,20 +513,6 @@
       "sha512": "sha512-st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
       "path": "netstandard.library/2.0.3",
       "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
-    },
-    "SixLabors.ImageSharp/2.1.9": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-VcjfKbOExie3RgZGrQL1jJMI4iZ3J9B6ifDo2QpDVJUYhTZKVcKnBhpNOHqbvNjHgadAks1jzhRjB7OZet1PJA==",
-      "path": "sixlabors.imagesharp/2.1.9",
-      "hashPath": "sixlabors.imagesharp.2.1.9.nupkg.sha512"
-    },
-    "System.Buffers/4.5.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg==",
-      "path": "system.buffers/4.5.1",
-      "hashPath": "system.buffers.4.5.1.nupkg.sha512"
     },
     "System.Collections/4.3.0": {
       "type": "package",
@@ -641,20 +598,6 @@
       "path": "system.linq/4.3.0",
       "hashPath": "system.linq.4.3.0.nupkg.sha512"
     },
-    "System.Memory/4.5.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
-      "path": "system.memory/4.5.4",
-      "hashPath": "system.memory.4.5.4.nupkg.sha512"
-    },
-    "System.Numerics.Vectors/4.5.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ==",
-      "path": "system.numerics.vectors/4.5.0",
-      "hashPath": "system.numerics.vectors.4.5.0.nupkg.sha512"
-    },
     "System.Reflection/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -718,13 +661,6 @@
       "path": "system.runtime/4.3.0",
       "hashPath": "system.runtime.4.3.0.nupkg.sha512"
     },
-    "System.Runtime.CompilerServices.Unsafe/5.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA==",
-      "path": "system.runtime.compilerservices.unsafe/5.0.0",
-      "hashPath": "system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512"
-    },
     "System.Runtime.Extensions/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -752,13 +688,6 @@
       "sha512": "sha512-BiIg+KWaSDOITze6jGQynxg64naAPtqGHBwDrLaCtixsa5bKiR8dpPOHA7ge3C0JJQizJE+sfkz1wV+BAKAYZw==",
       "path": "system.text.encoding/4.3.0",
       "hashPath": "system.text.encoding.4.3.0.nupkg.sha512"
-    },
-    "System.Text.Encoding.CodePages/5.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-NyscU59xX6Uo91qvhOs2Ccho3AR2TnZPomo1Z0K6YpyztBPM/A5VbkzOO19sy3A3i1TtEnTxA7bCe3Us+r5MWg==",
-      "path": "system.text.encoding.codepages/5.0.0",
-      "hashPath": "system.text.encoding.codepages.5.0.0.nupkg.sha512"
     },
     "System.Threading/4.3.0": {
       "type": "package",

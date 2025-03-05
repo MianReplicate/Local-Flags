@@ -6,30 +6,36 @@ using System.Linq;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using ImageMagick;
 using Lua;
 using Lua.Proxy;
 using MoonSharp.Interpreter;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using UnityEngine;
 using UnityEngine.Networking;
 using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "1.1.0")]
+/**
+ TODO: 
+Ravenfield wont start up after long optimization? Maybe queuing is out of sync..?
+**/
+
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "1.2.0")]
 public class LocalFlags : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
     internal const string Framework = "Custom Flag Framework";
     internal static List<Pack> packs = new List<Pack>();
     internal static int CurrentlyDownloading;
+    internal static int CurrentlyOptimizing;
     internal static int QueuedLoads;
     internal static float PrevTimeScale;
     public static LocalFlags Instance;
     
     private void Awake()
     {
+        
         Instance = this;
         // Plugin startup logic
         Logger = base.Logger;
@@ -57,7 +63,8 @@ public class LocalFlags : BaseUnityPlugin
     {
         if (QueuedLoads > 0)
         {
-            PrevTimeScale = PrevTimeScale == 0 ? Time.timeScale : PrevTimeScale;
+            if(Time.timeScale != 0)
+                PrevTimeScale = PrevTimeScale == 0 ? Time.timeScale : PrevTimeScale;
             Time.timeScale = 0;
         } else
         {
@@ -65,11 +72,21 @@ public class LocalFlags : BaseUnityPlugin
         }
     }
 
-    public void QueueTextureAsync(string filePath, Action<Texture2D> onComplete)
+    public void QueueTextureAsync(string filePath, Action<Texture2D> onComplete, bool nonReadable = false, bool optimizing = false)
     {
-        StartCoroutine(LoadTextureAsync(filePath, onComplete));
+        StartCoroutine(LoadTextureAsync(filePath, onComplete, nonReadable, optimizing));
     }
 
+    public void QueueOptimizeTextureAsync(string filePath, Action<Texture2D> onComplete)
+    {
+        StartCoroutine(LoadTextureAsync(filePath, texture =>
+        {
+            onComplete.Invoke(texture);
+            Destroy(texture);
+            Resources.UnloadUnusedAssets();
+        }, false, true));
+    }
+    
     public Texture2D LoadTexture(string filePath)
     {
         QueuedLoads++;
@@ -80,6 +97,7 @@ public class LocalFlags : BaseUnityPlugin
             texture.LoadImage(File.ReadAllBytes(filePath));
             texture.name = Path.GetFileNameWithoutExtension(filePath);
             texture.Compress(false);
+            texture.Apply(false, true);
         }
         catch (Exception e)
         {
@@ -89,12 +107,17 @@ public class LocalFlags : BaseUnityPlugin
         return texture;
     }
     
-    public IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete)
+    public IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onComplete, bool nonReadable = false, bool optimizing = false)
     {
         QueuedLoads++;
-        while (CurrentlyDownloading >= 10)
+        while (CurrentlyDownloading >= 10 || (CurrentlyOptimizing > 0 && !optimizing))
         {
             yield return null;
+        }
+
+        if (optimizing)
+        {
+            CurrentlyOptimizing++;
         }
         CurrentlyDownloading++;
         Logger.LogInfo($"Currently loading {CurrentlyDownloading} textures..");
@@ -102,7 +125,7 @@ public class LocalFlags : BaseUnityPlugin
         // convert filePath
         var convertedFilePath = "file:///" + filePath.Replace("\\", "/");
 
-        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(convertedFilePath))
+        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(convertedFilePath, nonReadable))
         {
             var async = www.SendWebRequest();
             while (!async.isDone)
@@ -112,19 +135,28 @@ public class LocalFlags : BaseUnityPlugin
 
             if (www.result != UnityWebRequest.Result.Success)
             {
+                if (optimizing)
+                {
+                    CurrentlyOptimizing--;
+                }
+                CurrentlyDownloading--;
                 Logger.LogError($"Failed to load {filePath}: {www.error}");
                 yield break;
             }
-            
             Texture2D texture = DownloadHandlerTexture.GetContent(www); 
             texture.name = Path.GetFileNameWithoutExtension(filePath);
-            texture.Compress(false);
-        
+
+            if (optimizing)
+            {
+                CurrentlyOptimizing--;
+            }
+            CurrentlyDownloading--;
             Logger.LogInfo($"Texture ({texture.name}) loaded successfully: {texture.width}x{texture.height} from {filePath}");
             onComplete?.Invoke(texture);
+            www.DisposeHandlers();
         }
-        CurrentlyDownloading--;
         QueuedLoads--;
+        Resources.UnloadUnusedAssets();
     }
 }
 
@@ -155,8 +187,9 @@ public class Pack
         {
             _cover = DefaultCover;
         }
-        
+
         var flags = GetFlagFiles();
+        var toOptimize = GetOptimizeFlagFiles();
         var colorPaths = GetColorFiles();
         var colors = new List<String>();
         foreach(var colorPath in colorPaths)
@@ -164,31 +197,66 @@ public class Pack
             colors.Add(Path.GetFileNameWithoutExtension(colorPath));
         }
 
+        if (toOptimize != null)
+        {
+            foreach (var flagPath in toOptimize)
+            {
+                LocalFlags.Logger.LogInfo($"Optimizing texture: {Path.GetFileNameWithoutExtension(flagPath)}");
+                LocalFlags.Instance.QueueOptimizeTextureAsync(flagPath, texture =>
+                {
+                    byte[] bytes = texture.EncodeToJPG(100); // make quality a user value
+                    IMagickImage<byte> image = new MagickImage(bytes);
+                    image.SetCompression(CompressionMethod.DXT5);
+                    if (image.Width > 2000 && image.Height > 2000)
+                    {
+                        image.Resize(new Percentage(25));
+                    }
+                    image.Write(_directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(flagPath) + ".jpg", MagickFormat.Jpeg);
+                    File.Delete(flagPath);
+                    LocalFlags.Logger.LogInfo($"Finished optimizing: {Path.GetFileNameWithoutExtension(flagPath)}");
+                });
+            }
+        }
+        
         if (flags != null)
         {
             _flagsToTeamColors = new Color[flags.Length];
-            for(int i = 0; i < flags.Length; i++)
+            foreach(var flagPath in flags)
             {
-                String flagPath = flags[i];
                 LocalFlags.Instance.QueueTextureAsync(flagPath, texture =>
                 {
                     
                     texture.name = texture.name.ToUpper();
+                    texture.Compress(false);
+                    texture.Apply(false, true);
                     AddFlag(texture);
                     int flagLocation = _flags.IndexOf(texture);
 
                     var colorIndex = colors.FindIndex(color => color.ToUpper() == texture.name);
+                    Color unityColor;
+                    string pathToUse;
                     if (colorIndex != -1)
                     {
-                        using (var image = Image.Load<Rgba32>(colorPaths[colorIndex]))
-                        {
-                            var color = image[0, 0];
-                            var unityColor = new Color((float) color.R / 255, (float) color.G / 255, (float) color.B / 255);
-
-                            _flagsToTeamColors[flagLocation] = unityColor;
-                            LocalFlags.Logger.LogInfo($"Added color ({unityColor.r}, {unityColor.g}, {unityColor.b}) for {texture.name}");
-                        }
+                        pathToUse = colorPaths[colorIndex];
                     }
+                    else
+                    {
+                        pathToUse = flagPath;
+                    }
+                    
+                    IMagickImage<byte> image = new MagickImage(File.ReadAllBytes(pathToUse));
+                    if (colorIndex == -1)
+                    {
+                        image.Resize(15, 15);
+                        image.Write(_directory + @"\CustomFlagToTeamColors\" + texture.name + ".jpeg", MagickFormat.Jpeg);
+                    }
+                    IMagickColor<byte> pixel = image.GetPixels()[0, 0].ToColor();
+                    
+                    unityColor = new Color((float) pixel.R / 255, (float) pixel.G / 255, (float) pixel.B / 255);
+                    image.Dispose();
+                    
+                    _flagsToTeamColors[flagLocation] = unityColor;
+                    LocalFlags.Logger.LogInfo($"Added color ({unityColor.r}, {unityColor.g}, {unityColor.b}) for {texture.name}");
                 });
             }
         }
@@ -219,24 +287,51 @@ public class Pack
         _flags.Add(flag);
     }
 
+    public String[] GetOptimizeFlagFiles()
+    {
+        if (!Directory.Exists(_directory + "\\OptimizeFlags"))
+        {
+            Directory.CreateDirectory(_directory + "\\OptimizeFlags");
+        }
+        return Directory.GetFiles(_directory + "\\OptimizeFlags");
+    }
+
     public String[] GetFlagFiles()
     {
-        if (Directory.Exists(_directory + "\\CustomFlags"))
+        if (!Directory.Exists(_directory + "\\CustomFlags"))
         {
-            return Directory.GetFiles(_directory + "\\CustomFlags");
+            Directory.CreateDirectory(_directory + "\\CustomFlags");
         }
-
-        return null;
+        
+        var optimizedFlags = GetOptimizeFlagFiles();
+        var flags = Directory.GetFiles(_directory + "\\CustomFlags");
+        var array = new List<String>();
+        
+        foreach (var flag in flags)
+        {
+            array.Add(flag);
+        }
+        
+        foreach(string optimizedFlag in optimizedFlags)
+        {
+            var path = _directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(optimizedFlag) + ".jpg";
+            if (!array.Contains(path))
+            {
+                array.Add(path);
+            }
+        }
+        
+        return array.ToArray();
     }
 
     public String[] GetColorFiles()
     {
         if (Directory.Exists(_directory + "\\CustomFlagToTeamColors"))
         {
-            return Directory.GetFiles(_directory + "\\CustomFlagToTeamColors");
+            Directory.CreateDirectory(_directory + "\\CustomFlagToTeamColors");
         }
 
-        return null;
+        return Directory.GetFiles(_directory + "\\CustomFlagToTeamColors");
     }
 }
 

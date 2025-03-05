@@ -24,7 +24,7 @@ public class ModPaths
     {
         CreateModDirectoryIfNotExist();
         DefaultCoverPath = GetPathForModDirectory("cover.png");
-        PacksPath = GetPathForModDirectory("Packs");
+        PacksPath = Path.Combine(Paths.PluginPath, "LocalFlags");
         
         if (!Directory.Exists(PacksPath))
         {

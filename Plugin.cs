@@ -10,13 +10,14 @@ using ImageMagick;
 using Lua;
 using Lua.Proxy;
 using MoonSharp.Interpreter;
+using Ravenfield.Mutator.Configuration;
 using UnityEngine;
 using UnityEngine.Networking;
 using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "1.2.0")]
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.0.0")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;
@@ -25,7 +26,7 @@ public class LocalFlags : BaseUnityPlugin
     private static int _currentlyDownloading;
     private static int _currentlyOptimizing;
     private static int _queuedLoads;
-    private static float _prevTimeScale;
+    private static float _prevTimeScale = 1;
     public static LocalFlags Instance;
     
     private void Awake()
@@ -34,7 +35,7 @@ public class LocalFlags : BaseUnityPlugin
         Instance = this;
         // Plugin startup logic
         Logger = base.Logger;
-        Logger.LogInfo($"Local Flags is gonna local all over you!");
+        Logger.LogInfo($"Local Flags is gonna local all over you! :wink:");
         
         var harmony = new Harmony("netdot.mian.patch");
         harmony.PatchAll();
@@ -159,6 +160,7 @@ public class Pack
     private readonly List<Texture2D> _flags = [];
     private readonly Color[] _flagsToTeamColors;
     private readonly string _directory;
+    private readonly MutatorEntry _mutatorEntry;
 
     public Pack(string directory, string name)
     {
@@ -177,11 +179,19 @@ public class Pack
         {
             _cover = DefaultCover;
         }
+        
+        _mutatorEntry = new MutatorEntry
+        {
+            name = _name,
+            menuImage = _cover,
+            configuration = new MutatorConfiguration(),
+            description = "A local pack from Local Flags!"
+        };
 
         var flags = GetFlagFiles();
         var toOptimize = GetOptimizeFlagFiles();
         var colorPaths = GetColorFiles();
-        var colors = colorPaths.Select(colorPath => Path.GetFileNameWithoutExtension(colorPath)).ToList();
+        var colors = colorPaths.ToList();
 
         if (toOptimize != null)
         {
@@ -265,6 +275,11 @@ public class Pack
         return _flagsToTeamColors.ToList();
     }
 
+    public MutatorEntry GetMutatorEntry()
+    {
+        return _mutatorEntry;
+    }
+
     private void AddFlag(Texture2D flag)
     {
         _flags.Add(flag);
@@ -288,14 +303,9 @@ public class Pack
         
         var optimizedFlags = GetOptimizeFlagFiles();
         var flags = Directory.GetFiles(_directory + "\\CustomFlags");
-        var array = new List<String>();
+        var array = flags.ToList();
         
-        foreach (var flag in flags)
-        {
-            array.Add(flag);
-        }
-        
-        foreach(string optimizedFlag in optimizedFlags)
+        foreach(var optimizedFlag in optimizedFlags)
         {
             var path = _directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(optimizedFlag) + ".jpg";
             if (!array.Contains(path))
@@ -319,30 +329,56 @@ public class Pack
 }
 
 [HarmonyPatch(typeof(ModManager))]
-[HarmonyPatch(nameof(ModManager.SpawnAllEnabledMutatorPrefabs))] // if possible use nameof() here
-class ModManagerPatch
+[HarmonyPatch(nameof(ModManager.OnGameManagerStart))]
+class AddBuiltInMutatorPatch
 {
+    static void Prefix(ModManager __instance)
+    {
+        foreach (var pack in LocalFlags.Packs)
+        {
+            // no idea why but the game object seems to just die after a while for some reason? So we have to add it again to prevent an error
+            pack.GetMutatorEntry().mutatorPrefab = new GameObject(pack.GetName());
+            __instance.builtInMutators.Add(pack.GetMutatorEntry());
+        }
+    }
+}
 
+[HarmonyPatch(typeof(ModManager))]
+[HarmonyPatch(nameof(ModManager.SpawnAllEnabledMutatorPrefabs))]
+class MutatorLoadPatch
+{
+    static void Prefix()
+    {
+        foreach (var pack in LocalFlags.Packs)
+        {
+            // no idea why but the game object seems to just die after a while for some reason? So we have to add it again to prevent an error
+            pack.GetMutatorEntry().mutatorPrefab = new GameObject(pack.GetName());
+        }
+    }
     static void Postfix()
     {
         LocalFlags.Logger.LogInfo("MODMANAGER JUST CREATED DA PREFABS!");
         var prefab = GameObject.Find(LocalFlags.Framework);
-        if (prefab && ScriptedBehaviour.GetScript(prefab) != null)
+        if (prefab && ScriptedBehaviour.GetScript(prefab))
         {
             var framework = ScriptedBehaviour.GetScript(prefab);
 
             LocalFlags.Logger.LogInfo("Found framework! Adding local packs.");
 
+            var mutatorEntries = ModManager.GetAllEnabledMutators();
             foreach (var pack in LocalFlags.Packs)
             {
-                LocalFlags.Logger.LogInfo($"Adding local pack: {pack.GetName().ToUpper()}");
-                Dictionary<string, object> mutatorData = [];
-                mutatorData.Add("name", pack.GetName());
-                mutatorData.Add("cover", pack.GetCover());
-                mutatorData.Add("CustomFlags", pack.GetFlags());
-                mutatorData.Add("CustomFlagToTeamColors", pack.GetFlagsToTeamColors());
+                if (mutatorEntries.Contains(pack.GetMutatorEntry()))
+                {
+                    LocalFlags.Logger.LogInfo($"Adding local pack: {pack.GetName().ToUpper()}");
+                    Dictionary<string, object> mutatorData = [];
+                    mutatorData.Add("name", pack.GetName());
+                    mutatorData.Add("cover", pack.GetCover());
+                    mutatorData.Add("CustomFlags", pack.GetFlags());
+                    mutatorData.Add("CustomFlagToTeamColors", pack.GetFlagsToTeamColors());
 
-                framework.Call("addFlagPack", mutatorData);
+                    framework.Call("addFlagPack", mutatorData);
+                }
             }
 
         }

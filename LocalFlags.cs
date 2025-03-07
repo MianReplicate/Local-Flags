@@ -40,9 +40,9 @@ public class LocalFlags : BaseUnityPlugin
         var harmony = new Harmony("netdot.mian.patch");
         harmony.PatchAll();
         
-        ModPaths.Init();
+        CustomPaths.Init();
         
-        var packPaths = Directory.GetDirectories(ModPaths.PacksPath);
+        var packPaths = Directory.GetDirectories(CustomPaths.PacksPath);
         foreach (var packPath in packPaths)
         {
             var arr = packPath.Split('\\');
@@ -153,7 +153,7 @@ public class LocalFlags : BaseUnityPlugin
 
 public class Pack
 {
-    private static readonly Texture2D DefaultCover = LocalFlags.LoadTexture(ModPaths.DefaultCoverPath);
+    private static readonly Texture2D DefaultCover = LocalFlags.LoadTexture(CustomPaths.DefaultCoverPath);
 
     private readonly string _name;
     private readonly Texture2D _cover;

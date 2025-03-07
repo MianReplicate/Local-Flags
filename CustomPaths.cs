@@ -3,7 +3,7 @@ using BepInEx;
 
 namespace LocalFlags;
 
-public class ModPaths
+public class CustomPaths
 {
     public static string DefaultCoverPath;
     public static string PacksPath;

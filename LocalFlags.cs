@@ -17,7 +17,7 @@ using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.0")]
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.1")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;
@@ -65,7 +65,7 @@ public class LocalFlags : BaseUnityPlugin
         }
         catch (Exception e)
         {
-            Logger.LogError($"Failed to load texture ({filePath}): "+e);
+            Logger.LogError($"Failed to load texture ({filePath}): {e.Message}");
         }
         return texture;
     }
@@ -77,7 +77,7 @@ public class Pack
 
     private readonly string _name;
     private readonly Texture2D _cover;
-    private readonly List<Texture2D> _flags = [];
+    private readonly Texture2D[] _flags;
     private readonly Color[] _flagsToTeamColors;
     private readonly string _directory;
     private readonly MutatorEntry _mutatorEntry;
@@ -107,63 +107,77 @@ public class Pack
             configuration = new MutatorConfiguration(),
             description = "A local pack from Local Flags!"
         };
-
-        var flags = GetFlagFiles();
+        
         var toOptimize = GetOptimizeFlagFiles();
-        var colorPaths = GetColorFiles();
-        var colors = colorPaths.ToList();
 
         if (toOptimize != null)
         {
             foreach (var flagPath in toOptimize)
             {
                 LocalFlags.Logger.LogInfo($"Optimizing texture: {Path.GetFileNameWithoutExtension(flagPath)}");
-                var texture = LocalFlags.LoadTexture(flagPath);
-                var bytes = texture.EncodeToJPG(100); // make quality a user value
-                IMagickImage<byte> image = new MagickImage(bytes);
-                image.SetCompression(CompressionMethod.DXT5);
-                if (image.Width > 2000 && image.Height > 2000)
+                try
                 {
-                    image.Resize(new Percentage(25));
+                    var bytes = File.ReadAllBytes(flagPath);
+                    IMagickImage<byte> image = new MagickImage(bytes);
+                    image.SetCompression(CompressionMethod.DXT3);
+                    if (image.Width > 2000 && image.Height > 2000)
+                    {
+                        image.Resize(new Percentage(25));
+                    }
+                    image.Write(_directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(flagPath) + ".jpg", MagickFormat.Jpeg);
+                    image.Dispose();
+                    File.Delete(flagPath);
+                    Resources.UnloadUnusedAssets();
+                    LocalFlags.Logger.LogInfo($"Finished optimizing: {Path.GetFileNameWithoutExtension(flagPath)}");
                 }
-                image.Write(_directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(flagPath) + ".jpg", MagickFormat.Jpeg);
-                File.Delete(flagPath);
-                LocalFlags.Logger.LogInfo($"Finished optimizing: {Path.GetFileNameWithoutExtension(flagPath)}");
+                catch (Exception e)
+                {
+                    LocalFlags.Logger.LogError($"Failed to optimize texture. The format might be unsupported: {e.Message}");
+                }
             }
         }
         
+        var flags = GetFlagFiles();
+        var colorPaths = GetColorFiles();
+        var colors = colorPaths.ToList();
         if (flags != null)
         {
             _flagsToTeamColors = new Color[flags.Length];
-            foreach(var flagPath in flags)
+            _flags = new Texture2D[flags.Length];
+            for(var i = 0; i < flags.Length; i++)
             {
-                var texture = LocalFlags.LoadTexture(flagPath);   
-                texture.name = texture.name.ToUpper();
-                AddFlag(texture);
-                    
-                var flagLocation = _flags.IndexOf(texture);
-                var colorIndex = colors.FindIndex(color => color.ToUpper() == texture.name);
-                var pathToUse = colorIndex != -1 ? colors[colorIndex] : flagPath;
-                    
-                IMagickImage<byte> image = new MagickImage(File.ReadAllBytes(pathToUse));
-                IMagickColor<byte> pixel;
-                if (colorIndex == -1)
+                var flagPath = flags[i];
+                var texture = LocalFlags.LoadTexture(flagPath);
+                if (texture != null)
                 {
-                    image.Resize(1, 1);
-                    pixel = image.GetPixels()[0, 0].ToColor();
-                    image.Resize(15, 15);
-                    image.Write(_directory + @"\CustomFlagToTeamColors\" + texture.name + ".jpeg", MagickFormat.Jpeg);
-                }
-                else
-                {
-                    pixel = image.GetPixels()[0, 0].ToColor();
-                }
+                    texture.name = texture.name.ToUpper();
+                    _flags[i] = texture;
+
+                    var colorIndex = colors.FindIndex(color => color.ToUpper() == texture.name);
+                    var pathToUse = colorIndex != -1 ? colors[colorIndex] : flagPath;
                     
-                var unityColor = new Color((float) pixel.R / 255, (float) pixel.G / 255, (float) pixel.B / 255);
-                image.Dispose();
+                    IMagickImage<byte> image = new MagickImage(File.ReadAllBytes(pathToUse));
+                    IMagickColor<byte> pixel;
+                    if (colorIndex == -1)
+                    {
+                        image.Resize(1, 1);
+                        pixel = image.GetPixels()[0, 0].ToColor();
+                        image.Resize(15, 15);
+                        image.Write(_directory + @"\CustomFlagToTeamColors\" + texture.name + ".jpeg", MagickFormat.Jpeg);
+                    }
+                    else
+                    {
+                        pixel = image.GetPixels()[0, 0].ToColor();
+                    }
                     
-                _flagsToTeamColors[flagLocation] = unityColor;
-                LocalFlags.Logger.LogInfo($"Added color ({unityColor.r}, {unityColor.g}, {unityColor.b}) for {texture.name}");
+                    var unityColor = new Color((float) pixel.R / 255, (float) pixel.G / 255, (float) pixel.B / 255);
+                    image.Dispose();
+                    
+                    _flagsToTeamColors[i] = unityColor;
+                    LocalFlags.Logger.LogInfo($"Added color ({unityColor.r}, {unityColor.g}, {unityColor.b}) for {texture.name}");   
+                }
+
+                Resources.UnloadUnusedAssets();
             }
         }
     }
@@ -178,7 +192,7 @@ public class Pack
         return _cover;
     }
 
-    public List<Texture2D> GetFlags()
+    public Texture2D[] GetFlags()
     {
         return _flags;
     }
@@ -191,11 +205,6 @@ public class Pack
     public MutatorEntry GetMutatorEntry()
     {
         return _mutatorEntry;
-    }
-
-    private void AddFlag(Texture2D flag)
-    {
-        _flags.Add(flag);
     }
 
     private string[] GetOptimizeFlagFiles()
@@ -214,20 +223,7 @@ public class Pack
             Directory.CreateDirectory(_directory + "\\CustomFlags");
         }
         
-        var optimizedFlags = GetOptimizeFlagFiles();
-        var flags = Directory.GetFiles(_directory + "\\CustomFlags");
-        var array = flags.ToList();
-        
-        foreach(var optimizedFlag in optimizedFlags)
-        {
-            var path = _directory + @"\CustomFlags\" + Path.GetFileNameWithoutExtension(optimizedFlag) + ".jpg";
-            if (!array.Contains(path))
-            {
-                array.Add(path);
-            }
-        }
-        
-        return array.ToArray();
+        return Directory.GetFiles(_directory + "\\CustomFlags");
     }
 
     private string[] GetColorFiles()

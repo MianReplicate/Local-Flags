@@ -23,7 +23,7 @@ Before you begin installing this mod, I recommend optimizing your flags beforeha
 1. Install [BepInEx 5](https://github.com/BepInEx/BepInEx) into Ravenfield.
 2. Download the latest release for [Local Flags](https://github.com/MianReplicate/Local-Flags/releases).
 3. Extract zip into ```Ravenfield\BepInEx\plugins```
-4. Open the newly extracted folder, open "Local" and drag any flag textures (jpg and png only) you want into the "CustomFlags" folder. If you are too lazy to optimize your images, drop them in the "OptimizeFlags" folder instead. They will get optimized and moved to "CustomFlags" automatically upon mod start.
+4. Open the newly extracted folder, open "Local" and drag any flag textures (jpg and png only) you want into the "CustomFlags" folder. If your images are not JPG/PNG, or they are not optimized, drop them in the "OptimizeFlags" folder instead. They will get optimized, converted to JPG and moved to "CustomFlags" automatically upon mod start.
 5. Launch Ravenfield and enjoy your new flags! The first startup may take some additional time to load as colors have to be generated for your images which can take long if they are not optimized!
 
 **(Optional Steps)**

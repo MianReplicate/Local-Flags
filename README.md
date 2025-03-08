@@ -1,4 +1,4 @@
-**Subscribing to this WILL not give you the mod. Instead you will get a mutator that does jack shit. Please read the description in its entirety before requesting help on this mod**
+**Subscribing to this WILL not give you the mod. Instead you will get a mutator that does jack shit. Please read the description in its entirety before requesting help on this mod. However, it would be appreciated if you subscribed AS that does boost popularity!**
 
 # Introduction
 Imagine installing the Custom Flags Framework to add in your favorite flags only to find that nobody has created a flag pack that has your favorite flags! What to do? Well, usually you'd follow a guide to create your own flag pack, however that may seem daunting to non-modders as that requires learning the Unity Editor and learning how to use Ravenfield modding tools. Thus, here comes Local Flags!

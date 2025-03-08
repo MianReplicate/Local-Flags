@@ -1,9 +1,9 @@
+**Subscribing to this WILL not give you the mod. Instead you will get a mutator that does jack shit. Please read the description in its entirety before requesting help on this mod**
+
 # Introduction
 Imagine installing the Custom Flags Framework to add in your favorite flags only to find that nobody has created a flag pack that has your favorite flags! What to do? Well, usually you'd follow a guide to create your own flag pack, however that may seem daunting to non-modders as that requires learning the Unity Editor and learning how to use Ravenfield modding tools. Thus, here comes Local Flags!
 
 Local Flags is a BepInEx mod on GitHub for Ravenfield that interacts with the [Custom Flags Framework](https://steamcommunity.com/sharedfiles/filedetails/?id=3385310995) to allow users to add their own flags locally without needing to make their own flag packs with the Unity Editor. As such this removes the need for downloading or learning external tools like the Ravenfield modding tools or the Unity Editor.
-
-Subscribing to this WILL not give you the mod. Instead you will get a mutator that does jack shit.
 
 # Why Release on GitHub?!
 - A proper release cannot be provided on the workshop because this is a BepInEx mod that would otherwise not exist due to the limitations of RS. Follow the below instructions to install this.

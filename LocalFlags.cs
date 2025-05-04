@@ -17,7 +17,7 @@ using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.1")]
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.2")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;

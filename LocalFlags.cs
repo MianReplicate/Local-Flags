@@ -152,8 +152,8 @@ public class Pack
                 {
                     texture.name = texture.name.ToUpper();
                     _flags[i] = texture;
-
-                    var colorIndex = colors.FindIndex(color => color.ToUpper() == texture.name);
+                    
+                    var colorIndex = colors.FindIndex(color => Path.GetFileNameWithoutExtension(color).ToUpper().Equals(texture.name));
                     var pathToUse = colorIndex != -1 ? colors[colorIndex] : flagPath;
                     
                     IMagickImage<byte> image = new MagickImage(File.ReadAllBytes(pathToUse));
@@ -232,7 +232,7 @@ public class Pack
         {
             Directory.CreateDirectory(_directory + "\\CustomFlagToTeamColors");
         }
-
+        
         return Directory.GetFiles(_directory + "\\CustomFlagToTeamColors");
     }
 }

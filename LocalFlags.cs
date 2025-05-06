@@ -17,7 +17,7 @@ using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.2")]
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.3")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;
@@ -80,7 +80,7 @@ public class Pack
     private readonly Texture2D[] _flags;
     private readonly Color[] _flagsToTeamColors;
     private readonly string _directory;
-    private readonly MutatorEntry _mutatorEntry;
+    private readonly MutatorEntryData _mutatorEntry;
 
     public Pack(string directory, string name)
     {
@@ -100,10 +100,10 @@ public class Pack
             _cover = DefaultCover;
         }
         
-        _mutatorEntry = new MutatorEntry
+        _mutatorEntry = new MutatorEntryData
         {
             name = _name,
-            menuImage = _cover,
+            texture = _cover,
             configuration = new MutatorConfiguration(),
             description = "A local pack from Local Flags!"
         };
@@ -202,7 +202,7 @@ public class Pack
         return _flagsToTeamColors.ToList();
     }
 
-    public MutatorEntry GetMutatorEntry()
+    public MutatorEntryData GetMutatorEntry()
     {
         return _mutatorEntry;
     }

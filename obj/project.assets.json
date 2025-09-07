@@ -3049,8 +3049,110 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-6hgw-6x87-578x",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-9ccg-6pjw-x645",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-cfh4-9f7v-fhrc",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-cjc8-g9w8-chfw",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-fh55-q5pj-pxgw",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-hm4x-r5hc-794f",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-mxvv-97wh-cfmm",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-qh3h-j545-h8c9",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-qp29-wxp5-wh82",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Magick.NET-Q8-AnyCPU' 14.5.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-vmhh-8rxq-fp9g",
+      "libraryId": "Magick.NET-Q8-AnyCPU",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    }
+  ]
 }

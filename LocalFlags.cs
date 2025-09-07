@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,12 +11,11 @@ using Lua.Proxy;
 using MoonSharp.Interpreter;
 using Ravenfield.Mutator.Configuration;
 using UnityEngine;
-using UnityEngine.Networking;
 using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.3")]
+[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.4")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;
@@ -103,7 +101,7 @@ public class Pack
         _mutatorEntry = new MutatorEntryData
         {
             name = _name,
-            texture = _cover,
+            menuImage = _cover,
             configuration = new MutatorConfiguration(),
             description = "A local pack from Local Flags!"
         };

@@ -15,7 +15,7 @@ using Color = UnityEngine.Color;
 
 namespace LocalFlags;
 
-[BepInPlugin("netdot.mian.localflags", "Local Flags", "2.1.4")]
+[BepInPlugin("ravenfield.mian.localflags", "Local Flags", "2.1.4")]
 public class LocalFlags : BaseUnityPlugin
 {
     public new static ManualLogSource Logger;
@@ -29,7 +29,7 @@ public class LocalFlags : BaseUnityPlugin
         Logger = base.Logger;
         Logger.LogInfo($"Local Flags is gonna local all over you! :wink:");
         
-        var harmony = new Harmony("netdot.mian.patch");
+        var harmony = new Harmony("ravenfield.mian.localflags");
         harmony.PatchAll();
         
         CustomPaths.Init();

@@ -24,11 +24,12 @@ Before you begin installing this mod, I recommend optimizing your flags beforeha
 2. Download the latest release for [Local Flags](https://github.com/MianReplicate/Local-Flags/releases).
 3. Extract zip into ```Ravenfield\BepInEx\plugins```
 4. Open the newly extracted folder, open "Local" and drag any flag textures (jpg and png only) you want into the "CustomFlags" folder. If your images are not JPG/PNG, or they are not optimized, drop them in the "OptimizeFlags" folder instead. They will get optimized, converted to JPG and moved to "CustomFlags" automatically upon mod start.
-5. Launch Ravenfield and enjoy your new flags! The first startup may take some additional time to load as colors have to be generated for your images which can take long if they are not optimized!
+6. Launch Ravenfield! The first startup may take some additional time to load as colors have to be generated for your images which can take long if they are not optimized!
+7. Before starting a match, you must enable the "Local" mutator to actually enable the flags for use in the Custom Flags Framework. If you changed the name of the "Local" folder, the mutator name will also change to reflect this.
 
 **(Optional Steps)**
 
-1. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover. Make sure your file is named "cover" and is a jpg or png file.
+1. If you want, you can add a cover inside of the "Local" folder. This will replace the default cover of the mutator pack. Make sure your file is named "cover" and is a jpg or png file.
 2. If you want to, you can create multiple local packs. Duplicate the "Local" folder and rename it. This name will be the name of the pack in game. You now have another pack that you can separate flags into and put a different cover for!
 
 # FAQ
